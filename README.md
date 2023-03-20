@@ -6,9 +6,18 @@ Interactive Chatbot with Real-Time Emotional Analysis/Integration
 
 - Clone this repository
 - Enter the commands:
+
   - Make a virtual environment: `python -m venv .venv`
   - Activate it (for Windows command prompt): `.venv\Scripts\activate`
   - `pip install requirements.txt -r`
+  - Open an OpenAI account at `https://platform.openai.com/account/org-settings`
+  - Add a .env file to the top level directory with the following environment variables.
+
+    ```
+    OPENAI_API_KEY=xxxx
+    OPENAI_ORG_NAME=xxxxx
+    ```
+
   - `cd src/`
   - `streamlit run app.py`
 
