@@ -28,6 +28,9 @@ Interactive Chatbot with Real-Time Emotional Analysis/Integration
 - <https://github.com/omar178/Emotion-recognition>
 - <https://github.com/gradio-app/hub-emotion-recognition>
 - <https://github.com/joeychrys/streamlit-chatGPT/blob/master/src/main.py>
+- <https://blog.streamlit.io/how-to-build-the-streamlit-webrtc-component/>
+- <https://github.com/nicolalandro/yolov5_streamlit>
+- <https://github.com/nextstep-infotech/Open-AI/blob/main/streamlit_chatGPT_clone.py>
 
 ### Huggingface
 
