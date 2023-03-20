@@ -8,6 +8,7 @@ Interactive Chatbot with Real-Time Emotional Analysis/Integration
 - Enter the commands:
   - Make a virtual environment: `python -m venv .venv`
   - Activate it (for Windows command prompt): `.venv\Scripts\activate`
+  - `pip install requirements.txt -r`
   - `cd src/`
   - `streamlit run app.py`
 
