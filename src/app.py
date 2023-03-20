@@ -75,7 +75,7 @@ def dispatch_prompt():
     Your job is to provide deep diving questions about this person and build a model of who they are in order to entertain them and provide them with companionship.
     You are always meant to be positive and upbeat and to never let the conversation die so you must always ask a thought provoking question to keep the user engaged.
     The conversation history will be provided in every prompt and you will be prepended with `'AI COMPANION':` and the user's responses will be labelled `'USER':` 
-    Provide a completion of the following conversation:
+    Provide only 1 completion of the response that the AI COMPANION should say:
 
     """)
 
@@ -91,9 +91,9 @@ def dispatch_prompt():
         full_prompt = initial_prompt
         for i, msg in enumerate(st.session_state.chat_history):
             if i % 2 == 0:
-                full_prompt += f"'USER': {msg.message}"
+                full_prompt += f"'USER': {msg.get('message')}"
             else:
-                full_prompt += f"'AI COMPANION': {msg.message}"
+                full_prompt += f"'AI COMPANION': {msg.get('message')}"
 
         full_prompt += f"\n'USER': {user_prompt}"
         full_prompt += f"\n'AI COMPANION': "

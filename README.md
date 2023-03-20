@@ -56,3 +56,9 @@ Interactive Chatbot with Real-Time Emotional Analysis/Integration
 - API Calls
   - Emotion Detection Model to get detected emotion
   - Large Language Model to get response to do something with the detected emotion
+
+# TODO
+
+- [ ] Flip the conversation history to show most recent messages first
+- [ ] Make the form input chat text clear on change.
+- [ ] figure out to continuously grab the video image to pipe into another emotion detection api
