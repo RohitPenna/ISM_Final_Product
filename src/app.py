@@ -10,6 +10,7 @@ from decouple import config
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
 import av
 from streamlit_chat import message as st_message
+import tensorflow as tf
 
 
 # Initialize OpenAI API
@@ -20,19 +21,63 @@ RTC_CONFIGURATION = RTCConfiguration(
     {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
 )
 
+#loading the pre-trained model file
+model = tf.keras.models.load_model('final_model.h5')
+
 class VideoProcessor:
     def recv(self, frame):
-        img = frame.to_ndarray(format="bgr24")
+        processed_frames = []
+        frame = frame.to_ndarray(format="bgr24")
+
+        class_labels = ['Angry','Disgust','Fear','Happy','Neutral', 'Sad', 'Surprise']
+        faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
         
-        # vision processing
-        flipped = img[:, ::-1, :]
 
-        # model processing
-        im_pil = Image.fromarray(flipped)
-        results = st.model(im_pil, size=112)
-        bbox_img = np.array(results.render()[0])
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    
+        #Detecting the faces
+        faces = faceCascade.detectMultiScale(gray,1.1,4)
+        for(x, y, w, h) in faces:
 
-        return av.VideoFrame.from_ndarray(bbox_img, format="bgr24")
+            #Drawing rectangle over the face area
+            cv2.rectangle(frame, (x,y), (x+w, y+h), (0,255, 0), 2)
+            face = gray[y:y + h, x:x + w]
+            face = cv2.resize(face,(48,48))
+            face = np.expand_dims(face,axis=0)
+            face = face/255.0
+            # print(f"after /255 {face.shape=}")
+            # face = face[:, :, 4:]
+            # print(f"after img[:, :, 4:] {face.shape=}")
+            face = face.reshape(face.shape[0],48,48,1)
+
+            # Predicting the emotion with the pre-trained model
+            # preds = model.predict(face)[0]
+            preds = model.predict(face)[0]
+            label = class_labels[preds.argmax()]
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(frame, label, (x,y), font, 1, (0,0,225), 2, cv2.LINE_4)
+            
+            emotion_dict = {}
+            for score, emotion in zip(preds, class_labels):
+                emotion_dict[emotion] = score
+            
+            print(label)
+            print(emotion_dict)
+
+        # returning a frame of the live cam with it's corresponding emotion
+        return processed_frames
+        
+        # img = frame.to_ndarray(format="bgr24")
+        
+        # # vision processing
+        # flipped = img[:, ::-1, :]
+
+        # # model processing
+        # im_pil = Image.fromarray(flipped)
+        # results = st.model(im_pil, size=112)
+        # bbox_img = np.array(results.render()[0])
+
+        # return av.VideoFrame.from_ndarray(bbox_img, format="bgr24")
 
 
 # # Define function to detect emotions using OpenAI API
@@ -148,6 +193,10 @@ def run_app():
             media_stream_constraints={"video": True, "audio": False},
             async_processing=True,
         )
+        # camera_stream = webrtc_streamer(
+        #     key="WYH",
+        #     video_processor_factory=VideoProcessor
+        # )
 
     
 

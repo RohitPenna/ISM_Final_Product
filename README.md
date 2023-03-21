@@ -34,7 +34,7 @@ Interactive Chatbot with Real-Time Emotional Analysis/Integration
 - OpenAI large language models (Chat GPT)
 - Hypermodern Python Coding Standards (<https://cookiecutter-hypermodern-python.readthedocs.io/en/2021.3.14/guide.html>)
 
-### Inspiration Repos
+### Inspiration Repos/Articles
 
 - <https://github.com/hwchase17/langchain>
 - <https://github.com/omar178/Emotion-recognition>
@@ -43,6 +43,10 @@ Interactive Chatbot with Real-Time Emotional Analysis/Integration
 - <https://blog.streamlit.io/how-to-build-the-streamlit-webrtc-component/>
 - <https://github.com/nicolalandro/yolov5_streamlit>
 - <https://github.com/nextstep-infotech/Open-AI/blob/main/streamlit_chatGPT_clone.py>
+- <https://blog.devgenius.io/facial-emotion-detection-using-aws-rekognition-in-python-69b2da668192>
+- <https://github.com/codedev99/fast-face-exp>
+- <https://github.com/sanjeevm4788/Face-emotion-detection>
+- <https://stackoverflow.com/questions/69439390/streamlit-image-processing>
 
 ### Huggingface
 
@@ -71,4 +75,5 @@ Interactive Chatbot with Real-Time Emotional Analysis/Integration
 
 - [ ] Flip the conversation history to show most recent messages first
 - [ ] Make the form input chat text clear on change.
-- [ ] figure out to continuously grab the video image to pipe into another emotion detection api
+- [x] figure out how to continuously grab the video image to pipe into another emotion detection api
+- [ ] figure out how to continuously update state with the emotion dictionary and wire it up to the chatbot prompt with the average since last updated.
