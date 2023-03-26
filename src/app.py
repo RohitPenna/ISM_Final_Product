@@ -85,7 +85,7 @@ def initialize_state():
         st.session_state.emotion_history = []
 
     if "facial_emotion_dict" not in st.session_state:
-        st.session_state.facial_emotion_dict = {'Angry': 0.0, 'Disgust': 0.0, 'Fear': 0.0, 'Happy': 0.0, 'Neutral': 0.0, 'Sad': 0.0, 'Surprise': 0.0}
+        st.session_state.facial_emotion_dict = {'Angry': 0.0, 'Disgust': 0.0, 'Fear': 0.0, 'Happy': 0.0, 'Neutral': 0.0, 'Sad': 0.0, 'Surprise': 0.0, 'NoStrongSignal': 0}
 
     if "hacky_key_to_clear_input_on_submission" not in st.session_state:
         st.session_state.hacky_key_to_clear_input_on_submission = 1000
@@ -190,22 +190,34 @@ def run_app():
             # current_emotion_label = st.empty()
             json_total_emotion_display = st.empty()
             # json_frame_emotion_display = st.empty()
-            
+
             while True:
                 if camera_stream.video_processor:
                     try:
                         frame_emotion_dict = camera_stream.video_processor.emotion_dict_queue.get(
                             timeout=1.0
                         )
+                        print(frame_emotion_dict)
                     except queue.Empty:
-                        frame_emotion_dict = {'Angry': 0.0, 'Disgust': 0.0, 'Fear': 0.0, 'Happy': 0.0, 'Neutral': 0.0, 'Sad': 0.0, 'Surprise': 0.0}
+                        frame_emotion_dict = {'Angry': 0.0, 'Disgust': 0.0, 'Fear': 0.0, 'Happy': 0.0, 'Neutral': 0.0, 'Sad': 0.0, 'Surprise': 0.0, 'NoStrongSignal': 0}
 
-                    # get a deep copy from facial_emotion_dict from state, += each of the values in the frame_emotion_dict, save it back to state.
+                    # # get a deep copy from facial_emotion_dict from state, += each of the values in the frame_emotion_dict, save it back to state.
+                    # current_facial_emotion_dict = copy.deepcopy(st.session_state.facial_emotion_dict)
+                    # for key, value in frame_emotion_dict.items():
+                    #     current_facial_emotion_dict[key] += value
+                    # st.session_state.facial_emotion_dict = current_facial_emotion_dict
+
+
                     current_facial_emotion_dict = copy.deepcopy(st.session_state.facial_emotion_dict)
-                    for key, value in frame_emotion_dict.items():
-                        current_facial_emotion_dict[key] += value
-                    st.session_state.facial_emotion_dict = current_facial_emotion_dict
 
+                    # if no strong signal, dont do anything
+                    if not all([ val<=0.15 for val in list(frame_emotion_dict.values()) ]):       
+                        # get max value from emotion_dict and increment emotion in state.
+                        emotion_label = max(frame_emotion_dict, key=frame_emotion_dict.get)
+                        current_facial_emotion_dict[emotion_label] += 1
+                        st.session_state.facial_emotion_dict = current_facial_emotion_dict
+                    else:
+                        current_facial_emotion_dict['NoStrongSignal'] += 1
                     # current_emotion_label.text(f"Current Emotion\n{max(frame_emotion_dict, key=frame_emotion_dict.get)}: {max(frame_emotion_dict.values())}")
 
                     # json_frame_emotion_display.json(frame_emotion_dict)
