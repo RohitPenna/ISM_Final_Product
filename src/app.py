@@ -104,35 +104,22 @@ def initialize_state():
     # """)
 
 def dispatch_prompt():
-    initial_prompt = ("""You are an AI chatbot on a website that is wired to a live webcam that is continuously summing the user's emotions of Angry, Disgust, Fear, Happy, Neutral, Sad and Surprise.
-    Every frame calculates their relative emotions and adds it to the sum of emotions. 
-    You will receive a series of prompts from said user and information about their emotion extracted from their face while they read your prompt.
-    Your task is to make them feel good and happy. So take their feedback in consideration when constructing happy things to say.
-    Here is their emotional status encoded in USER_EMOTIONS and message, respond to them to make them feel happy:
+    initial_prompt = ("""You are an AI chatbot on a website that is wired to a live webcam that is continuously classifying the user's emotions of Angry, Disgust, Fear, Happy, Neutral, Sad, Surprise and incrementing the value count of each emotion.
+    Every frame classifies the user emotion and provides a confidence score. If the confidence score is over 20 percent the count of that emoiton increases by 1.
+    You will receive a list of dictionaries containing the chat history between you and the user.
+    If the dictionary's 'is_user' == True, then that is the user's 'message' and 'user_emotion', if 'is_user' is False, then that is your message.
+    Your task is to make them feel good and happy. So take their feedback in consideration when constructing happy things to say. Do not end the conversation and keep it going.
+    The following list is the chat history, respond back with only your 'message' do not include anything else in your message back:
     
     """)
 
     user_prompt = st.session_state.input_text
     user_emotion = copy.deepcopy(st.session_state.facial_emotion_dict)
+
+    st.session_state.chat_history.append({'message':user_prompt, "is_user":True, 'user_emotion': user_emotion})
     
-    if st.session_state.num_prompts_user_sent == 0:
-        full_prompt = f"{initial_prompt} 'USER_EMOTIONS': {user_emotion}\n'USER': {user_prompt}\n"
-        full_prompt += f"\n'AI COMPANION': "
-    else:
-        # construct the whole conversation.
 
-        full_prompt = initial_prompt
-
-        for i, msg in enumerate(st.session_state.chat_history):
-            
-            if msg.get("is_user"):
-                full_prompt += f"'USER_EMOTIONS': {msg.get('user_emotion')} 'USER': {msg.get('message')}"
-            else:
-                full_prompt += f"'AI COMPANION': {msg.get('message')}"
-
-        full_prompt += f"\n'USER_EMOTIONS': {user_emotion}"
-        full_prompt += f"\n'USER': {user_prompt}"
-        full_prompt += f"\n'AI COMPANION': "
+    full_prompt = f"{initial_prompt}\n{st.session_state.chat_history[::-1]}"
 
     print(f"{st.session_state.num_prompts_user_sent=}")
     print(f"{full_prompt=}")
@@ -143,7 +130,7 @@ def dispatch_prompt():
                             {"role": "user", "content": full_prompt}
                         ]
                     )
-    st.session_state.chat_history.append({'message':st.session_state.input_text, "is_user":True, 'user_emotion': user_emotion})
+    
     st.session_state.chat_history.append({'message':response.choices[0].message.content, "is_user": False})
     st.session_state.num_prompts_user_sent +=1
 
@@ -197,7 +184,7 @@ def run_app():
                         frame_emotion_dict = camera_stream.video_processor.emotion_dict_queue.get(
                             timeout=1.0
                         )
-                        print(frame_emotion_dict)
+                        # print(frame_emotion_dict)
                     except queue.Empty:
                         frame_emotion_dict = {'Angry': 0.0, 'Disgust': 0.0, 'Fear': 0.0, 'Happy': 0.0, 'Neutral': 0.0, 'Sad': 0.0, 'Surprise': 0.0, 'NoStrongSignal': 0}
 
