@@ -87,9 +87,6 @@ def initialize_state():
     if "facial_emotion_dict" not in st.session_state:
         st.session_state.facial_emotion_dict = {'Angry': 0.0, 'Disgust': 0.0, 'Fear': 0.0, 'Happy': 0.0, 'Neutral': 0.0, 'Sad': 0.0, 'Surprise': 0.0, 'NoStrongSignal': 0}
 
-    if "hacky_key_to_clear_input_on_submission" not in st.session_state:
-        st.session_state.hacky_key_to_clear_input_on_submission = 1000
-
 
 #TODO dropmenu for initial prompt options
 
@@ -103,13 +100,28 @@ def initialize_state():
 
     # """)
 
+def construct_prompt_from_chat_history(initial_prompt, chat_history):
+
+    full_prompt = initial_prompt
+
+    for msg in chat_history:
+        if msg['is_user']:
+
+            full_prompt += f"USER_MESSAGE: {msg['message']}\n"
+            full_prompt += f"USER_EMOTIONS: {msg['user_emotion']}\n"
+        else:
+            full_prompt += f"AI_MESSAGE: {msg['message']}\n"
+
+    full_prompt += f"AI_MESSAGE: "
+
+    return full_prompt
+
+    
 def dispatch_prompt():
-    initial_prompt = ("""You are an AI chatbot on a website that is wired to a live webcam that is continuously classifying the user's emotions of Angry, Disgust, Fear, Happy, Neutral, Sad, Surprise and incrementing the value count of each emotion.
-    Every frame classifies the user emotion and provides a confidence score. If the confidence score is over 20 percent the count of that emoiton increases by 1.
-    You will receive a list of dictionaries containing the chat history between you and the user.
-    If the dictionary's 'is_user' == True, then that is the user's 'message' and 'user_emotion', if 'is_user' is False, then that is your message.
-    Your task is to make them feel good and happy. So take their feedback in consideration when constructing happy things to say. Do not end the conversation and keep it going.
-    The following list is the chat history, respond back with only your 'message' do not include anything else in your message back:
+    initial_prompt = ("""You are an Emotional Support Companion AI chatbot on a website that is wired to a live webcam that is continuously classifying the user's emotions of Angry, Disgust, Fear, Happy, Neutral, Sad, Surprise and incrementing the value count of each emotion.
+    Every frame classifies the user emotion and provides a confidence score. If the confidence score is over 20 percent the count of that emotion increases by 1.
+    Your task is to ask interesting questions and provoke happy emotions. So take their feedback in consideration when constructing happy things to say. Do not end the conversation and always keep it going by asking interesting questions.
+    The following list is the chat history, respond back with only your 'AI_MESSAGE' do not include anything else in your message back:
     
     """)
 
@@ -119,7 +131,7 @@ def dispatch_prompt():
     st.session_state.chat_history.append({'message':user_prompt, "is_user":True, 'user_emotion': user_emotion})
     
 
-    full_prompt = f"{initial_prompt}\n{st.session_state.chat_history[::-1]}"
+    full_prompt = construct_prompt_from_chat_history(initial_prompt, st.session_state.chat_history)
 
     print(f"{st.session_state.num_prompts_user_sent=}")
     print(f"{full_prompt=}")
