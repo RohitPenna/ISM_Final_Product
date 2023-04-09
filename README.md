@@ -47,6 +47,8 @@ Interactive Chatbot with Real-Time Emotional Analysis/Integration
 - <https://github.com/codedev99/fast-face-exp>
 - <https://github.com/sanjeevm4788/Face-emotion-detection>
 - <https://stackoverflow.com/questions/69439390/streamlit-image-processing>
+- <https://github.com/whitphx/streamlit-fesion>
+- <https://github.com/whitphx/streamlit-webrtc/blob/56d715a76247cd6303c9ddade5bc2a8e430ddc2f/app.py#L344>
 
 ### Huggingface
 

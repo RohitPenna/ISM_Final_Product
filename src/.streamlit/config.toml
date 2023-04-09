@@ -1,0 +1,5 @@
+[global]
+showWarningOnDirectExecution = false
+
+[logger]
+level = "error"
