@@ -114,16 +114,30 @@ def construct_prompt_from_chat_history(initial_prompt, chat_history):
 
     full_prompt += f"AI_MESSAGE: "
 
+    print(full_prompt)
+
     return full_prompt
 
     
 def dispatch_prompt():
-    initial_prompt = ("""You are an Emotional Support Companion AI chatbot on a website that is wired to a live webcam that is continuously classifying the user's emotions of Angry, Disgust, Fear, Happy, Neutral, Sad, Surprise and incrementing the value count of each emotion.
+    initial_prompt_options = [
+        """You are an Emotional Support Companion AI chatbot on a website that is wired to a live webcam that is continuously classifying the user's emotions of Angry, Disgust, Fear, Happy, Neutral, Sad, Surprise and incrementing the value count of each emotion.
     Every frame classifies the user emotion and provides a confidence score. If the confidence score is over 20 percent the count of that emotion increases by 1.
     Your task is to ask interesting questions and provoke happy emotions. So take their feedback in consideration when constructing happy things to say. Do not end the conversation and always keep it going by asking interesting questions.
     The following list is the chat history, respond back with only your 'AI_MESSAGE' do not include anything else in your message back:
     
-    """)
+    """,
+
+    """Act like a Comedian AI chatbot that is wired to a live webcam that is continuously classifying the user's emotions of Angry, Disgust, Fear, Happy, Neutral, Sad, Surprise and incrementing the value count of each emotion.
+    Every frame classifies the user emotion and provides a confidence score. If the confidence score is over 20 percent the count of that emotion increases by 1.
+    Your task is to ask interesting questions and provoke happy emotions. So take their feedback in consideration when constructing happy things to say. Do not end the conversation and always keep it going by telling funny jokes.
+    The following list is the chat history, respond back with only your 'AI_MESSAGE' do not include anything else in your message back:
+    
+    """
+    ]
+
+
+    initial_prompt = initial_prompt_options[1]
 
     user_prompt = st.session_state.input_text
     user_emotion = copy.deepcopy(st.session_state.facial_emotion_dict)
@@ -210,13 +224,17 @@ def run_app():
                     current_facial_emotion_dict = copy.deepcopy(st.session_state.facial_emotion_dict)
 
                     # if no strong signal, dont do anything
-                    if not all([ val<=0.15 for val in list(frame_emotion_dict.values()) ]):       
+                    # if not all([ val<=0.15 for val in list(frame_emotion_dict.values()) ]):    
+                    if max(list(frame_emotion_dict.values())) > .20:
                         # get max value from emotion_dict and increment emotion in state.
+                        # print(f"{max(list(frame_emotion_dict.values()))=}")
                         emotion_label = max(frame_emotion_dict, key=frame_emotion_dict.get)
                         current_facial_emotion_dict[emotion_label] += 1
                         st.session_state.facial_emotion_dict = current_facial_emotion_dict
                     else:
+                        # print(f"{max(list(frame_emotion_dict.values()))=}")
                         current_facial_emotion_dict['NoStrongSignal'] += 1
+                        st.session_state.facial_emotion_dict = current_facial_emotion_dict
                     # current_emotion_label.text(f"Current Emotion\n{max(frame_emotion_dict, key=frame_emotion_dict.get)}: {max(frame_emotion_dict.values())}")
 
                     # json_frame_emotion_display.json(frame_emotion_dict)
