@@ -26,6 +26,8 @@ RTC_CONFIGURATION = RTCConfiguration(
 )
 
 #loading the pre-trained model file
+import os
+print(os.getcwd())
 model = tf.keras.models.load_model('final_model.h5')
 
 class VideoProcessor:

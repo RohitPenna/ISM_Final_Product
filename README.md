@@ -4,6 +4,8 @@ Interactive Chatbot with Real-Time Emotional Analysis/Integration
 
 ## Usage
 
+Option 1:
+
 - Clone this repository
 - Enter the commands:
 
@@ -20,6 +22,24 @@ Interactive Chatbot with Real-Time Emotional Analysis/Integration
 
   - `cd src/`
   - `streamlit run app.py`
+
+Option 2:
+
+- Download Docker Desktop
+- `docker pull rcsnyder/streamlitapp:0.0.1`
+- Enter into the app: `sudo docker run --rm -it -v /$(pwd)/src -p 8501:8501 --entrypoint bash rcsnyder/streamlitapp:0.0.1`
+- Add a .env file to the top level directory with the following environment variables.
+
+  ```
+  OPENAI_API_KEY=xxxx
+  OPENAI_ORG_NAME=xxxxx
+
+  ```
+
+- Start it: `streamlit run app.py --server.headless true --browser.serverAddress="0.0.0.0" --server.enableCORS false --server.enableXsrfProtection=false --browser.gatherUsageStats false`
+- Go to `localhost:8501`
+- Choose camera device
+- Click Start
 
 ### User Stories
 
