@@ -126,8 +126,6 @@ python-decouple
 python-json-logger
 pytz
 pytz-deprecation-shim
-pywin32
-pywinpty
 PyYAML
 pyzmq
 requests
