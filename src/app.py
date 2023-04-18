@@ -38,7 +38,7 @@ def create_logger(name, level = 'DEBUG', file = None):
     return logger
 
 if 'logger' not in st.session_state:
-    st.session_state['logger'] = create_logger(name = 'app', level = 'DEBUG', file = f'app_logs-{uuid.uuid4()}.log')
+    st.session_state['logger'] = create_logger(name = 'app', level = 'INFO', file = f'app_logs-{uuid.uuid4()}.log')
 logger = st.session_state['logger']
 
 
@@ -51,7 +51,7 @@ RTC_CONFIGURATION = RTCConfiguration(
 )
 
 #loading the pre-trained model file
-model = tf.keras.models.load_model('final_model.h5')
+model = tf.keras.models.load_model(os.getcwd() + '/final_model.h5')
 
 class VideoProcessor:
     
