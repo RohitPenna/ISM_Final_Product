@@ -15,6 +15,9 @@ import copy
 import queue
 import threading
 import json
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+import uuid
 
 
 # Initialize OpenAI API
@@ -87,7 +90,10 @@ def initialize_state():
         st.session_state.emotion_history = []
 
     if "facial_emotion_dict" not in st.session_state:
-        st.session_state.facial_emotion_dict = {'Angry': 0.0, 'Disgust': 0.0, 'Fear': 0.0, 'Happy': 0.0, 'Neutral': 0.0, 'Sad': 0.0, 'Surprise': 0.0, 'NoStrongSignal': 0}
+        st.session_state.facial_emotion_dict = {'Angry': 0.0, 'Disgust': 0.0, 'Fear': 0.0, 'Happy': 0.0, 'Neutral': 0.0, 'Sad': 0.0, 'Surprise': 0.0}
+
+    if 'guid' not in st.session_state:
+        st.session_state.guid = uuid.uuid4()
 
 
 #TODO dropmenu for initial prompt options
@@ -119,6 +125,73 @@ def construct_prompt_from_chat_history(initial_prompt, chat_history):
     print(full_prompt)
 
     return full_prompt
+
+
+def dispatch_prompt_v2():
+    initial_prompt_options = [
+        """You are an Emotional Support Companion AI chatbot on a website that is wired to a live webcam that is continuously classifying the user's emotions of Angry, Disgust, Fear, Happy, Neutral, Sad, Surprise and incrementing the value count of each emotion.
+    Every frame classifies the user emotion and provides a confidence score. If the confidence score is over 20 percent the count of that emotion increases by 1.
+    Your task is to ask interesting questions and provoke happy emotions. So take their feedback in consideration when constructing happy things to say. Do not end the conversation and always keep it going by asking interesting questions.
+    The following list is the chat history, respond back with only your 'AI_MESSAGE' do not include anything else in your message back:
+    
+    """,
+
+    """Act like a Comedian AI chatbot that is wired to a live webcam that is continuously classifying the user's emotions of Angry, Disgust, Fear, Happy, Neutral, Sad, Surprise and incrementing the value count of each emotion.
+    Every frame classifies the user emotion and provides a confidence score. If the confidence score is over 20 percent the count of that emotion increases by 1.
+    Your task is to ask interesting questions and provoke happy emotions. So take the emotion distribution into account when constructing happy things to say. Do not end the conversation and always keep it going by asking interesting questions. 
+    in consideration when constructing happy things to say. Do not end the conversation and always keep it going by telling funny jokes or asking a question.
+    """
+    ]
+
+    system_prompt = {"role": "system", "content": initial_prompt_options[1].rstrip()}
+
+    # initial_prompt = initial_prompt_options[1].rstrip()
+
+    user_prompt = st.session_state.input_text
+    user_emotion = copy.deepcopy(st.session_state.facial_emotion_dict)
+
+    # normalize the values of each of the user_emotion:
+
+    # print(user_emotion)
+
+    total = sum(user_emotion.values())
+    for key, value in user_emotion.items():
+        user_emotion[key] = round(value/total, 2)
+
+    # print(user_emotion)
+
+    chat_msg = {
+        "role": "user",
+        "content": user_prompt + f'. Distribution of the users emotions since the last message: {user_emotion}',
+        'message':user_prompt,          # only for chat construction
+        "is_user":True,                 # only for chat construction
+        'user_emotion': user_emotion    # for history
+    }
+
+    logging.info(f"Dispatch prompt: [{st.session_state.guid=}, {chat_msg=}]")
+
+    st.session_state.chat_history.append(chat_msg)
+    
+    msgs_for_chatgpt = [system_prompt]
+
+    for chat in st.session_state.chat_history:
+        msgs_for_chatgpt.append({"role": chat['role'], "content": chat['content']})
+    
+    # print(f"{chat=}")
+    # print(f"{msgs_for_chatgpt=}")
+    # for m in msgs_for_chatgpt:
+    #     print(m)
+    
+    response = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=msgs_for_chatgpt
+                    )
+    
+    logging.info(f"Dispatch prompt: [{st.session_state.guid=}, {response=}]")
+    
+    st.session_state.chat_history.append({'message':response.choices[0].message.content, "is_user": False, "role": "assistant", "content": response.choices[0].message.content})
+    # zero out the emotions
+    st.session_state.facial_emotion_dict = {'Angry': 0.0, 'Disgust': 0.0, 'Fear': 0.0, 'Happy': 0.0, 'Neutral': 0.0, 'Sad': 0.0, 'Surprise': 0.0}
 
     
 def dispatch_prompt():
@@ -173,6 +246,7 @@ def run_app():
 
 
     initialize_state()
+    logging.info(f"Starting session: [{st.session_state.guid=}]")
 
     # Add chatbox input/output display to page layout
     with col2:
@@ -188,10 +262,10 @@ def run_app():
         )
         if camera_stream.state.playing:
             with col1:
-                    st.header("AI ChatBot")
+                    st.header("OpenAI ChatGPT Wrapper:")
 
                     # start text input game.
-                    st.text_input("Talk to ChatGPT Here!", key='input_text', on_change=dispatch_prompt)
+                    st.text_input("Talk to ChatGPT Here!", key='input_text', on_change=dispatch_prompt_v2)
 
                     # Display response
                     with st.container():
@@ -199,7 +273,7 @@ def run_app():
                         if len(st.session_state.chat_history) != 0:
                         # reversed messages
                             for chat in st.session_state.chat_history[::-1]:
-                                print(chat)
+                                # print(chat)
                                 st_message(message=chat['message'], is_user=chat['is_user'])
 
             # current_emotion_label = st.empty()
@@ -214,7 +288,7 @@ def run_app():
                         )
                         # print(frame_emotion_dict)
                     except queue.Empty:
-                        frame_emotion_dict = {'Angry': 0.0, 'Disgust': 0.0, 'Fear': 0.0, 'Happy': 0.0, 'Neutral': 0.0, 'Sad': 0.0, 'Surprise': 0.0, 'NoStrongSignal': 0}
+                        frame_emotion_dict = {'Angry': 0.0, 'Disgust': 0.0, 'Fear': 0.0, 'Happy': 0.0, 'Neutral': 0.0, 'Sad': 0.0, 'Surprise': 0.0}
 
                     # # get a deep copy from facial_emotion_dict from state, += each of the values in the frame_emotion_dict, save it back to state.
                     # current_facial_emotion_dict = copy.deepcopy(st.session_state.facial_emotion_dict)
@@ -235,7 +309,7 @@ def run_app():
                         st.session_state.facial_emotion_dict = current_facial_emotion_dict
                     else:
                         # print(f"{max(list(frame_emotion_dict.values()))=}")
-                        current_facial_emotion_dict['NoStrongSignal'] += 1
+                        # current_facial_emotion_dict['NoStrongSignal'] += 1
                         st.session_state.facial_emotion_dict = current_facial_emotion_dict
                     # current_emotion_label.text(f"Current Emotion\n{max(frame_emotion_dict, key=frame_emotion_dict.get)}: {max(frame_emotion_dict.values())}")
 
