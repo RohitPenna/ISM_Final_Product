@@ -70,9 +70,10 @@ Option 3 (Deploy on AWS EC2):
   - `curl -fsSL https://get.docker.com -o get-docker.sh`
   - `sudo sh get-docker.sh`
   - `sudo docker pull rcsnyder/streamlitapp:0.0.1`
-  - (Skip until the Dockerfile paths are fixed.) `sudo docker run -it --rm -p 8501:8501 --env OPENAI_API_KEY=xxxx --env OPENAI_ORG_NAME=xxxx rcsnyder/streamlitapp:0.0.1`
-  - `sudo docker run --env OPENAI_API_KEY=xxxxx --env OPENAI_ORG_NAME=xxxx --rm -it -v /$(pwd)/src -p 8501:8501 --entrypoint bash rcsnyder/streamlitapp:0.0.1`
-  - `streamlit run app.py --server.headless true --browser.serverAddress="0.0.0.0" --server.enableCORS false --server.enableXsrfProtection=false --browser.gatherUsageStats false`
+  - `sudo docker run -it --rm -p 8501:8501 --env OPENAI_API_KEY=xxxx --env OPENAI_ORG_NAME=xxxx rcsnyder/streamlitapp:0.0.2`
+  - (Optional to get into the docker container)
+    - `sudo docker run --env OPENAI_API_KEY=xxxxx --env OPENAI_ORG_NAME=xxxx --rm -it -v /$(pwd)/src -p 8501:8501 --entrypoint bash rcsnyder/streamlitapp:0.0.1`
+    - `streamlit run app.py --server.headless true --browser.serverAddress="0.0.0.0" --server.enableCORS false --server.enableXsrfProtection=false --browser.gatherUsageStats false`
 
 - Go to `publicEC2IP.nip.io` and choose your camera device and click start.
 
