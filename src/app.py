@@ -19,7 +19,7 @@ import logging
 import uuid
 import os
 
-def create_logger(name, level = 'DEBUG', file = None):
+def create_logger(name, level = 'INFO', file = None):
     logger = logging.getLogger(name)
     logger.propagate = False
     logger.setLevel(level)
